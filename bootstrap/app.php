@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'oid4vp/*/response',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
