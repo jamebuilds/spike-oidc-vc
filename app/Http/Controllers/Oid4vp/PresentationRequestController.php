@@ -35,13 +35,6 @@ class PresentationRequestController extends Controller
         ]);
     }
 
-    public function presentationDefinition(string $id): JsonResponse
-    {
-        $requestData = $this->session->findOrFail($id);
-
-        return response()->json($requestData['presentation_definition']);
-    }
-
     public function show(string $id): JsonResponse
     {
         $requestData = $this->session->findOrFail($id);
