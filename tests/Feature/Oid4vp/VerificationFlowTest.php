@@ -2,6 +2,7 @@
 
 use App\Services\Oid4vp\SdJwt\JwtParser;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 it('verifies a valid SD-JWT response end-to-end', function () {
     // Set up: create a presentation request
@@ -21,6 +22,15 @@ it('verifies a valid SD-JWT response end-to-end', function () {
     // Post the response
     $postResponse = $this->post(route('oid4vp.response', $requestId), [
         'vp_token' => $sdJwt['compact'],
+        'presentation_submission' => json_encode([
+            'id' => Str::uuid()->toString(),
+            'definition_id' => $requestId,
+            'descriptor_map' => [[
+                'id' => 'identity_credential',
+                'format' => 'vc+sd-jwt',
+                'path' => '$',
+            ]],
+        ]),
     ]);
 
     $postResponse->assertOk();
@@ -48,6 +58,15 @@ it('rejects an SD-JWT with wrong nonce', function () {
 
     $this->post(route('oid4vp.response', $requestId), [
         'vp_token' => $sdJwt['compact'],
+        'presentation_submission' => json_encode([
+            'id' => Str::uuid()->toString(),
+            'definition_id' => $requestId,
+            'descriptor_map' => [[
+                'id' => 'identity_credential',
+                'format' => 'vc+sd-jwt',
+                'path' => '$',
+            ]],
+        ]),
     ]);
 
     $statusResponse = $this->getJson(route('oid4vp.status', $requestId));
@@ -153,7 +172,7 @@ function buildTestSdJwt(string $nonce, string $requestId): array
     $kbHeader = ['alg' => 'ES256', 'typ' => 'kb+jwt'];
     $kbPayload = [
         'nonce' => $nonce,
-        'aud' => url("/oid4vp/{$requestId}"),
+        'aud' => url("/oid4vp/{$requestId}/response"),
         'iat' => time(),
     ];
 

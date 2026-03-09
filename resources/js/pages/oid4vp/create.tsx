@@ -28,6 +28,7 @@ export default function Create() {
         useState<VerificationResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [showRaw, setShowRaw] = useState(false);
+    const [copied, setCopied] = useState(false);
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const stopPolling = useCallback(() => {
@@ -172,6 +173,26 @@ export default function Create() {
                             <div className="flex items-center gap-2 text-xs text-[#706f6c] dark:text-[#A1A09A]">
                                 <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-500" />
                                 Waiting for wallet response...
+                            </div>
+                            <div className="w-full rounded-md bg-[#f5f5f4] p-3 dark:bg-[#1a1a19]">
+                                <div className="mb-1 flex items-center justify-between">
+                                    <span className="text-xs font-medium text-[#706f6c] dark:text-[#A1A09A]">
+                                        Authorization URL
+                                    </span>
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(uri);
+                                            setCopied(true);
+                                            setTimeout(() => setCopied(false), 2000);
+                                        }}
+                                        className="rounded px-2 py-0.5 text-xs text-[#706f6c] transition-colors hover:bg-[#e5e5e3] hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:bg-[#2a2a28] dark:hover:text-[#EDEDEC]"
+                                    >
+                                        {copied ? 'Copied!' : 'Copy'}
+                                    </button>
+                                </div>
+                                <p className="break-all font-mono text-xs text-[#1b1b18] dark:text-[#EDEDEC]">
+                                    {uri}
+                                </p>
                             </div>
                             {requestId && (
                                 <p className="mt-1 break-all font-mono text-xs text-[#706f6c] dark:text-[#A1A09A]">

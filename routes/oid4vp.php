@@ -9,6 +9,7 @@ Route::prefix('oid4vp')->group(function () {
     Route::get('/', [PresentationRequestController::class, 'create'])->name('oid4vp.create');
     Route::post('/', [PresentationRequestController::class, 'store'])->name('oid4vp.store');
     Route::get('/{id}', [PresentationRequestController::class, 'show'])->name('oid4vp.show');
+    Route::get('/{id}/pd', [PresentationRequestController::class, 'presentationDefinition'])->name('oid4vp.pd');
 
     Route::post('/{id}/response', StorePresentationResponseController::class)->name('oid4vp.response');
     Route::get('/{id}/status', GetPresentationStatusController::class)->name('oid4vp.status');

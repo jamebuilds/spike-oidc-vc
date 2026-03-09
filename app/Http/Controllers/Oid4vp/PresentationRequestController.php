@@ -21,45 +21,63 @@ class PresentationRequestController extends Controller
         $id = Str::uuid()->toString();
         $nonce = Str::random(32);
 
-        $requestUri = url("/oid4vp/{$id}");
         $responseUri = url("/oid4vp/{$id}/response");
-        $clientId = $requestUri;
+        $clientId = $responseUri;
+        $pdUri = url("/oid4vp/{$id}/pd");
 
-        $requestData = [
-            'response_type' => 'vp_token',
-            'nonce' => $nonce,
-            'client_id' => $clientId,
-            'response_uri' => $responseUri,
-            'response_mode' => 'direct_post',
-            'dcql_query' => [
-                'credentials' => [[
-                    'id' => 'cred_vc',
-                    'format' => 'dc+sd-jwt',
-                    'meta' => ['vct_values' => ['urn:eudi:pid:1']],
-                    'claims' => [['path' => ['age_equal_or_over', '18']]],
-                ]],
-            ],
-            'client_metadata' => [
-                'vp_formats' => [
-                    'dc+sd-jwt' => [
-                        'alg' => ['ES256'],
+        $presentationDefinition = [
+            'id' => $id,
+            'input_descriptors' => [[
+                'id' => 'identity_credential',
+                'format' => [
+                    'vc+sd-jwt' => ['alg' => ['ES256']],
+                ],
+                'constraints' => [
+                    'fields' => [
+                        [
+                            'path' => ['$.vct'],
+                            'filter' => ['type' => 'string', 'const' => 'urn:eudi:pid:1'],
+                        ],
+                        [
+                            'path' => ['$.age_equal_or_over.18'],
+                        ],
                     ],
                 ],
-            ],
+            ]],
         ];
 
-        Cache::put("oid4vp:request:{$id}", $requestData, now()->addMinutes(10));
+        Cache::put("oid4vp:request:{$id}", [
+            'nonce' => $nonce,
+            'presentation_definition' => $presentationDefinition,
+        ], now()->addMinutes(10));
         Cache::put("oid4vp:status:{$id}", ['status' => 'pending'], now()->addMinutes(10));
 
-        $openid4vpUri = 'openid4vp://?'.http_build_query([
-            'request_uri' => $requestUri,
+        $openid4vpUri = 'openid4vp://authorize?'.http_build_query([
+            'response_type' => 'vp_token',
             'client_id' => $clientId,
+            'response_mode' => 'direct_post',
+            'state' => $id,
+            'presentation_definition_uri' => $pdUri,
+            'client_id_scheme' => 'redirect_uri',
+            'nonce' => $nonce,
+            'response_uri' => $responseUri,
         ]);
 
         return response()->json([
             'id' => $id,
             'uri' => $openid4vpUri,
         ]);
+    }
+
+    public function presentationDefinition(string $id): JsonResponse
+    {
+        $requestData = Cache::get("oid4vp:request:{$id}");
+
+        if (! $requestData) {
+            abort(404, 'Presentation request not found or expired.');
+        }
+
+        return response()->json($requestData['presentation_definition']);
     }
 
     public function show(string $id): JsonResponse
