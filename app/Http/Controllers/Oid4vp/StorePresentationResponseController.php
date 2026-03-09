@@ -3,25 +3,22 @@
 namespace App\Http\Controllers\Oid4vp;
 
 use App\Http\Controllers\Controller;
+use App\Services\Oid4vp\PresentationSession;
 use App\Services\Oid4vp\SdJwt\SdJwtVerifier;
 use App\Services\Oid4vp\VpToken\VpTokenVerifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class StorePresentationResponseController extends Controller
 {
     public function __invoke(
         Request $request,
         string $id,
+        PresentationSession $session,
         SdJwtVerifier $sdJwtVerifier,
         VpTokenVerifier $vpTokenVerifier,
     ): JsonResponse {
-        $requestData = Cache::get("oid4vp:request:{$id}");
-
-        if (! $requestData) {
-            abort(404, 'Presentation request not found or expired.');
-        }
+        $requestData = $session->findOrFail($id);
 
         $responseData = $request->all();
 
@@ -40,11 +37,7 @@ class StorePresentationResponseController extends Controller
             $verificationResult = $result->toArray();
         }
 
-        Cache::put("oid4vp:status:{$id}", [
-            'status' => 'complete',
-            'data' => $responseData,
-            'verification' => $verificationResult,
-        ], now()->addMinutes(10));
+        $session->complete($id, $responseData, $verificationResult);
 
         return response()->json(['status' => 'ok']);
     }
