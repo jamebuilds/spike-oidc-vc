@@ -28,19 +28,22 @@ class PresentationRequestController extends Controller
         $presentationDefinition = [
             'id' => $id,
             'input_descriptors' => [[
-                'id' => 'identity_credential',
-                'format' => [
-                    'vc+sd-jwt' => ['alg' => ['ES256']],
-                ],
+                'id' => 'bankid_credential',
                 'constraints' => [
                     'fields' => [
                         [
-                            'path' => ['$.vct'],
-                            'filter' => ['type' => 'string', 'const' => 'urn:eudi:pid:1'],
+                            'path' => ['$.vc.type', '$.type'],
+                            'filter' => [
+                                'type' => 'string',
+                                'pattern' => 'BankId',
+                            ],
                         ],
-                        [
-                            'path' => ['$.age_equal_or_over.18'],
-                        ],
+                        ['path' => ['$.vc.credentialSubject.accountId', '$.credentialSubject.accountId']],
+                        ['path' => ['$.vc.credentialSubject.IBAN', '$.credentialSubject.IBAN']],
+                        ['path' => ['$.vc.credentialSubject.BIC', '$.credentialSubject.BIC']],
+                        ['path' => ['$.vc.credentialSubject.givenName', '$.credentialSubject.givenName']],
+                        ['path' => ['$.vc.credentialSubject.familyName', '$.credentialSubject.familyName']],
+                        ['path' => ['$.vc.credentialSubject.birthDate', '$.credentialSubject.birthDate']],
                     ],
                 ],
             ]],

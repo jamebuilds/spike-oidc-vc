@@ -26,8 +26,8 @@ it('verifies a valid SD-JWT response end-to-end', function () {
             'id' => Str::uuid()->toString(),
             'definition_id' => $requestId,
             'descriptor_map' => [[
-                'id' => 'identity_credential',
-                'format' => 'vc+sd-jwt',
+                'id' => 'bankid_credential',
+                'format' => 'jwt_vc_json',
                 'path' => '$',
             ]],
         ]),
@@ -62,8 +62,8 @@ it('rejects an SD-JWT with wrong nonce', function () {
             'id' => Str::uuid()->toString(),
             'definition_id' => $requestId,
             'descriptor_map' => [[
-                'id' => 'identity_credential',
-                'format' => 'vc+sd-jwt',
+                'id' => 'bankid_credential',
+                'format' => 'jwt_vc_json',
                 'path' => '$',
             ]],
         ]),
