@@ -1,12 +1,22 @@
 import { Head } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { store } from '@/actions/App/Http/Controllers/PresentationRequestController';
-import GetPresentationStatus from '@/actions/App/Http/Controllers/GetPresentationStatus';
+import { store } from '@/actions/App/Http/Controllers/Oid4vp/PresentationRequestController';
+import GetPresentationStatusController from '@/actions/App/Http/Controllers/Oid4vp/GetPresentationStatusController';
+
+type VerificationResult = {
+    is_valid: boolean;
+    claims: Record<string, unknown>;
+    disclosed_claims: Record<string, unknown>;
+    vct: string | null;
+    nonce: string | null;
+    errors: string[];
+};
 
 type StatusResponse = {
     status: 'pending' | 'complete';
     data?: Record<string, unknown>;
+    verification?: VerificationResult | null;
 };
 
 export default function Create() {
@@ -14,7 +24,10 @@ export default function Create() {
     const [requestId, setRequestId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<Record<string, unknown> | null>(null);
+    const [verification, setVerification] =
+        useState<VerificationResult | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showRaw, setShowRaw] = useState(false);
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const stopPolling = useCallback(() => {
@@ -30,11 +43,12 @@ export default function Create() {
 
             pollingRef.current = setInterval(async () => {
                 try {
-                    const response = await fetch(GetPresentationStatus.url(id));
+                    const response = await fetch(GetPresentationStatusController.url(id));
                     const data: StatusResponse = await response.json();
 
                     if (data.status === 'complete') {
                         setResult(data.data ?? null);
+                        setVerification(data.verification ?? null);
                         stopPolling();
                     }
                 } catch {
@@ -53,8 +67,10 @@ export default function Create() {
         setLoading(true);
         setError(null);
         setResult(null);
+        setVerification(null);
         setUri(null);
         setRequestId(null);
+        setShowRaw(false);
 
         try {
             const { url, method } = store.post();
@@ -92,7 +108,16 @@ export default function Create() {
         setUri(null);
         setRequestId(null);
         setResult(null);
+        setVerification(null);
         setError(null);
+        setShowRaw(false);
+    };
+
+    const renderClaimValue = (value: unknown): string => {
+        if (typeof value === 'object' && value !== null) {
+            return JSON.stringify(value, null, 2);
+        }
+        return String(value);
     };
 
     return (
@@ -149,7 +174,7 @@ export default function Create() {
                                 Waiting for wallet response...
                             </div>
                             {requestId && (
-                                <p className="mt-1 font-mono text-xs text-[#706f6c] break-all dark:text-[#A1A09A]">
+                                <p className="mt-1 break-all font-mono text-xs text-[#706f6c] dark:text-[#A1A09A]">
                                     Request ID: {requestId}
                                 </p>
                             )}
@@ -158,13 +183,107 @@ export default function Create() {
 
                     {result && (
                         <div className="flex flex-col gap-4">
-                            <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-400">
-                                <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
-                                Response received
+                            {verification && (
+                                <>
+                                    <div
+                                        className={`flex items-center gap-2 text-sm font-medium ${
+                                            verification.is_valid
+                                                ? 'text-green-700 dark:text-green-400'
+                                                : 'text-red-700 dark:text-red-400'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`inline-block h-2 w-2 rounded-full ${
+                                                verification.is_valid
+                                                    ? 'bg-green-500'
+                                                    : 'bg-red-500'
+                                            }`}
+                                        />
+                                        {verification.is_valid
+                                            ? 'Verification passed'
+                                            : 'Verification failed'}
+                                    </div>
+
+                                    {verification.vct && (
+                                        <div className="rounded-md bg-[#f5f5f4] px-3 py-2 dark:bg-[#1a1a19]">
+                                            <span className="text-xs font-medium text-[#706f6c] dark:text-[#A1A09A]">
+                                                Credential Type
+                                            </span>
+                                            <p className="font-mono text-sm">
+                                                {verification.vct}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {verification.errors.length > 0 && (
+                                        <div className="rounded-md bg-red-50 p-3 dark:bg-red-950">
+                                            <p className="mb-1 text-xs font-medium text-red-700 dark:text-red-300">
+                                                Errors
+                                            </p>
+                                            <ul className="list-inside list-disc text-xs text-red-600 dark:text-red-400">
+                                                {verification.errors.map(
+                                                    (err, i) => (
+                                                        <li key={i}>{err}</li>
+                                                    ),
+                                                )}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {Object.keys(
+                                        verification.disclosed_claims,
+                                    ).length > 0 && (
+                                        <div>
+                                            <p className="mb-2 text-xs font-medium text-[#706f6c] dark:text-[#A1A09A]">
+                                                Disclosed Claims
+                                            </p>
+                                            <div className="divide-y divide-[#e5e5e3] rounded-md bg-[#f5f5f4] dark:divide-[#2a2a28] dark:bg-[#1a1a19]">
+                                                {Object.entries(
+                                                    verification.disclosed_claims,
+                                                ).map(([key, value]) => (
+                                                    <div
+                                                        key={key}
+                                                        className="flex items-start justify-between gap-4 px-3 py-2"
+                                                    >
+                                                        <span className="text-xs font-medium text-[#706f6c] dark:text-[#A1A09A]">
+                                                            {key}
+                                                        </span>
+                                                        <span className="text-right font-mono text-xs">
+                                                            {renderClaimValue(
+                                                                value,
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {!verification && (
+                                <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-400">
+                                    <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
+                                    Response received
+                                </div>
+                            )}
+
+                            <div>
+                                <button
+                                    onClick={() => setShowRaw(!showRaw)}
+                                    className="mb-2 text-xs text-[#706f6c] underline hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:text-[#EDEDEC]"
+                                >
+                                    {showRaw
+                                        ? 'Hide raw data'
+                                        : 'Show raw data'}
+                                </button>
+                                {showRaw && (
+                                    <pre className="max-h-64 overflow-auto rounded-md bg-[#f5f5f4] p-4 font-mono text-xs dark:bg-[#0a0a0a]">
+                                        {JSON.stringify(result, null, 2)}
+                                    </pre>
+                                )}
                             </div>
-                            <pre className="max-h-96 overflow-auto rounded-md bg-[#f5f5f4] p-4 font-mono text-xs dark:bg-[#0a0a0a]">
-                                {JSON.stringify(result, null, 2)}
-                            </pre>
+
                             <button
                                 onClick={handleReset}
                                 className="w-full rounded-md bg-[#1b1b18] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2d2d2a] dark:bg-[#EDEDEC] dark:text-[#1b1b18] dark:hover:bg-[#d4d4d1]"

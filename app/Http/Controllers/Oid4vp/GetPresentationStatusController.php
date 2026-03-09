@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Oid4vp;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 
-class GetPresentationStatus extends Controller
+class GetPresentationStatusController extends Controller
 {
     public function __invoke(string $id): JsonResponse
     {
