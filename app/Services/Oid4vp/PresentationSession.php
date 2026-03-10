@@ -50,6 +50,10 @@ class PresentationSession
             'id' => $id,
             'input_descriptors' => [[
                 'id' => 'bankid_credential',
+                'format' => [
+                    'vc+sd-jwt' => [],
+                    'jwt_vp_json' => [],
+                ],
                 'constraints' => [
                     'fields' => [
                         [

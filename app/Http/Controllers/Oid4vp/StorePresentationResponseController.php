@@ -11,12 +11,16 @@ use Illuminate\Http\Request;
 
 class StorePresentationResponseController extends Controller
 {
+    /** @var array<string, class-string> */
+    private const FORMAT_VERIFIERS = [
+        'vc+sd-jwt' => SdJwtVerifier::class,
+        'jwt_vp_json' => VpTokenVerifier::class,
+    ];
+
     public function __invoke(
         Request $request,
         string $id,
         PresentationSession $session,
-        SdJwtVerifier $sdJwtVerifier,
-        VpTokenVerifier $vpTokenVerifier,
     ): JsonResponse {
         $requestData = $session->findOrFail($id);
 
@@ -27,11 +31,10 @@ class StorePresentationResponseController extends Controller
 
         if ($vpToken) {
             $expectedNonce = $requestData['nonce'] ?? '';
+            $presentationDefinition = $requestData['presentation_definition'];
 
-            // SD-JWT contains ~ delimiters; regular JWT does not
-            $verifier = str_contains($vpToken, '~')
-                ? $sdJwtVerifier
-                : $vpTokenVerifier;
+            $format = $this->resolveFormat($request, $presentationDefinition);
+            $verifier = app(self::FORMAT_VERIFIERS[$format]);
 
             $result = $verifier->verify($vpToken, $expectedNonce);
             $verificationResult = $result->toArray();
@@ -40,5 +43,44 @@ class StorePresentationResponseController extends Controller
         $session->complete($id, $responseData, $verificationResult);
 
         return response()->json(['status' => 'ok']);
+    }
+
+    private function resolveFormat(Request $request, array $presentationDefinition): string
+    {
+        $submission = json_decode($request->input('presentation_submission', ''), true);
+
+        if (! is_array($submission) || empty($submission['descriptor_map'])) {
+            abort(422, 'Missing or invalid presentation_submission');
+        }
+
+        $format = $submission['descriptor_map'][0]['format'] ?? null;
+
+        if (! $format || ! isset(self::FORMAT_VERIFIERS[$format])) {
+            abort(422, "Unsupported format: {$format}");
+        }
+
+        $acceptedFormats = $this->getAcceptedFormats($presentationDefinition);
+
+        if (! empty($acceptedFormats) && ! in_array($format, $acceptedFormats, true)) {
+            abort(422, "Format '{$format}' is not accepted by the presentation definition");
+        }
+
+        return $format;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function getAcceptedFormats(array $presentationDefinition): array
+    {
+        $formats = [];
+
+        foreach ($presentationDefinition['input_descriptors'] ?? [] as $descriptor) {
+            foreach (array_keys($descriptor['format'] ?? []) as $format) {
+                $formats[] = $format;
+            }
+        }
+
+        return array_unique($formats);
     }
 }

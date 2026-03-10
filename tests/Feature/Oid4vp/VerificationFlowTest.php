@@ -27,7 +27,7 @@ it('verifies a valid SD-JWT response end-to-end', function () {
             'definition_id' => $requestId,
             'descriptor_map' => [[
                 'id' => 'bankid_credential',
-                'format' => 'jwt_vc_json',
+                'format' => 'vc+sd-jwt',
                 'path' => '$',
             ]],
         ]),
@@ -63,7 +63,7 @@ it('rejects an SD-JWT with wrong nonce', function () {
             'definition_id' => $requestId,
             'descriptor_map' => [[
                 'id' => 'bankid_credential',
-                'format' => 'jwt_vc_json',
+                'format' => 'vc+sd-jwt',
                 'path' => '$',
             ]],
         ]),
@@ -90,6 +90,41 @@ it('handles a response without vp_token gracefully', function () {
     expect($status['status'])->toBe('complete');
     expect($status['verification'])->toBeNull();
     expect($status['data'])->toHaveKey('state', 'some-state');
+});
+
+it('rejects a response with missing presentation_submission', function () {
+    $response = $this->postJson(route('oid4vp.store'));
+    $requestId = $response->json('id');
+
+    $sdJwt = buildTestSdJwt('nonce', $requestId);
+
+    config(['oid4vp.skip_signature_verification' => true]);
+
+    $this->post(route('oid4vp.response', $requestId), [
+        'vp_token' => $sdJwt['compact'],
+    ])->assertUnprocessable();
+});
+
+it('rejects a response with unsupported format', function () {
+    $response = $this->postJson(route('oid4vp.store'));
+    $requestId = $response->json('id');
+
+    $sdJwt = buildTestSdJwt('nonce', $requestId);
+
+    config(['oid4vp.skip_signature_verification' => true]);
+
+    $this->post(route('oid4vp.response', $requestId), [
+        'vp_token' => $sdJwt['compact'],
+        'presentation_submission' => json_encode([
+            'id' => Str::uuid()->toString(),
+            'definition_id' => $requestId,
+            'descriptor_map' => [[
+                'id' => 'bankid_credential',
+                'format' => 'ldp_vp',
+                'path' => '$',
+            ]],
+        ]),
+    ])->assertUnprocessable();
 });
 
 it('returns 404 for expired request', function () {
