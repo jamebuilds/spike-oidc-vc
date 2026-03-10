@@ -8,12 +8,18 @@ type Props = {
     error: string | null;
 };
 
-export default function AuthorizationCreate({ matches, authRequest, error }: Props) {
+export default function AuthorizationCreate({
+    matches,
+    authRequest,
+    error,
+}: Props) {
     const [selectedMatchIndex, setSelectedMatchIndex] = useState(0);
     const match = matches[selectedMatchIndex] ?? null;
 
     // Track which optional disclosures are checked
-    const [checkedOptional, setCheckedOptional] = useState<Record<number, boolean>>({});
+    const [checkedOptional, setCheckedOptional] = useState<
+        Record<number, boolean>
+    >({});
 
     const { post, processing, errors, transform } = useForm({
         credential_id: match?.credential.id ?? 0,
@@ -28,13 +34,19 @@ export default function AuthorizationCreate({ matches, authRequest, error }: Pro
 
     // Transform computes the final payload at submission time, using current state
     transform(() => {
-        const requiredIndices = match?.requiredDisclosures.map((d) => d.index) ?? [];
+        const requiredIndices =
+            match?.requiredDisclosures.map((d) => d.index) ?? [];
         const selectedOptionalIndices =
-            match?.selectableDisclosures.filter((d) => checkedOptional[d.index]).map((d) => d.index) ?? [];
+            match?.selectableDisclosures
+                .filter((d) => checkedOptional[d.index])
+                .map((d) => d.index) ?? [];
 
         return {
             credential_id: match?.credential.id ?? 0,
-            selected_disclosures: [...requiredIndices, ...selectedOptionalIndices],
+            selected_disclosures: [
+                ...requiredIndices,
+                ...selectedOptionalIndices,
+            ],
             nonce: authRequest?.nonce ?? '',
             client_id: authRequest?.client_id ?? '',
             response_uri: authRequest?.response_uri ?? '',
@@ -62,7 +74,9 @@ export default function AuthorizationCreate({ matches, authRequest, error }: Pro
                 <Head title="Authorization Error" />
                 <div className="flex min-h-screen items-center justify-center bg-[#FDFDFC] p-6 dark:bg-[#0a0a0a]">
                     <div className="rounded-lg border border-red-200 bg-white p-6 text-center dark:border-red-800 dark:bg-[#161615]">
-                        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                        <p className="text-sm text-red-600 dark:text-red-400">
+                            {error}
+                        </p>
                         <Link
                             href="/wallet"
                             className="mt-4 inline-block text-sm text-[#706f6c] hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:text-[#EDEDEC]"
@@ -89,15 +103,24 @@ export default function AuthorizationCreate({ matches, authRequest, error }: Pro
                         </Link>
                     </div>
 
-                    <h1 className="mb-6 text-xl font-semibold">Authorization Request</h1>
+                    <h1 className="mb-6 text-xl font-semibold">
+                        Authorization Request
+                    </h1>
 
                     {/* Verifier Info */}
                     <div className="mb-6 rounded-lg border border-[#e3e3e0] bg-white p-5 shadow-sm dark:border-[#3E3E3A] dark:bg-[#161615]">
                         <h2 className="mb-2 text-sm font-medium">Verifier</h2>
-                        <p className="text-sm text-[#706f6c] dark:text-[#A1A09A]">{authRequest.client_id}</p>
-                        {authRequest.presentation_definition?.input_descriptors?.[0]?.purpose && (
+                        <p className="text-sm text-[#706f6c] dark:text-[#A1A09A]">
+                            {authRequest.client_id}
+                        </p>
+                        {authRequest.presentation_definition
+                            ?.input_descriptors?.[0]?.purpose && (
                             <p className="mt-2 text-sm text-[#706f6c] dark:text-[#A1A09A]">
-                                Purpose: {authRequest.presentation_definition.input_descriptors[0].purpose}
+                                Purpose:{' '}
+                                {
+                                    authRequest.presentation_definition
+                                        .input_descriptors[0].purpose
+                                }
                             </p>
                         )}
                     </div>
@@ -113,18 +136,23 @@ export default function AuthorizationCreate({ matches, authRequest, error }: Pro
                             {/* Credential selector (if multiple matches) */}
                             {matches.length > 1 && (
                                 <div className="mb-4">
-                                    <label className="mb-1 block text-sm font-medium">Select credential</label>
+                                    <label className="mb-1 block text-sm font-medium">
+                                        Select credential
+                                    </label>
                                     <select
                                         value={selectedMatchIndex}
                                         onChange={(e) => {
-                                            setSelectedMatchIndex(Number(e.target.value));
+                                            setSelectedMatchIndex(
+                                                Number(e.target.value),
+                                            );
                                             setCheckedOptional({});
                                         }}
                                         className="w-full rounded-md border border-[#e3e3e0] bg-[#FDFDFC] px-3 py-2 text-sm dark:border-[#3E3E3A] dark:bg-[#0a0a0a]"
                                     >
                                         {matches.map((m, i) => (
                                             <option key={i} value={i}>
-                                                {m.credential.type} — {m.credential.issuer}
+                                                {m.credential.type} —{' '}
+                                                {m.credential.issuer}
                                             </option>
                                         ))}
                                     </select>
@@ -133,7 +161,9 @@ export default function AuthorizationCreate({ matches, authRequest, error }: Pro
 
                             {match && (
                                 <div className="rounded-lg border border-[#e3e3e0] bg-white p-5 shadow-sm dark:border-[#3E3E3A] dark:bg-[#161615]">
-                                    <h2 className="mb-1 text-sm font-medium">{match.credential.type}</h2>
+                                    <h2 className="mb-1 text-sm font-medium">
+                                        {match.credential.type}
+                                    </h2>
                                     <p className="mb-4 text-xs text-[#706f6c] dark:text-[#A1A09A]">
                                         Issuer: {match.credential.issuer}
                                     </p>
@@ -141,26 +171,42 @@ export default function AuthorizationCreate({ matches, authRequest, error }: Pro
                                     {/* Required Disclosures */}
                                     {match.requiredDisclosures.length > 0 && (
                                         <div className="mb-4">
-                                            <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">
+                                            <h3 className="mb-2 text-xs font-medium tracking-wide text-[#706f6c] uppercase dark:text-[#A1A09A]">
                                                 Required Claims
                                             </h3>
                                             <div className="space-y-2">
-                                                {match.requiredDisclosures.map((d) => (
-                                                    <label
-                                                        key={d.index}
-                                                        className="flex items-center gap-3 rounded-md border border-[#e3e3e0] p-3 dark:border-[#3E3E3A]"
-                                                    >
-                                                        <input type="checkbox" checked disabled className="accent-emerald-600" />
-                                                        <div>
-                                                            <span className="text-sm font-medium">{d.claimName}</span>
-                                                            <span className="ml-2 text-xs text-[#706f6c] dark:text-[#A1A09A]">
-                                                                {typeof d.claimValue === 'object'
-                                                                    ? JSON.stringify(d.claimValue)
-                                                                    : String(d.claimValue)}
-                                                            </span>
-                                                        </div>
-                                                    </label>
-                                                ))}
+                                                {match.requiredDisclosures.map(
+                                                    (d) => (
+                                                        <label
+                                                            key={d.index}
+                                                            className="flex items-center gap-3 rounded-md border border-[#e3e3e0] p-3 dark:border-[#3E3E3A]"
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked
+                                                                disabled
+                                                                className="accent-emerald-600"
+                                                            />
+                                                            <div>
+                                                                <span className="text-sm font-medium">
+                                                                    {
+                                                                        d.claimName
+                                                                    }
+                                                                </span>
+                                                                <span className="ml-2 text-xs text-[#706f6c] dark:text-[#A1A09A]">
+                                                                    {typeof d.claimValue ===
+                                                                    'object'
+                                                                        ? JSON.stringify(
+                                                                              d.claimValue,
+                                                                          )
+                                                                        : String(
+                                                                              d.claimValue,
+                                                                          )}
+                                                                </span>
+                                                            </div>
+                                                        </label>
+                                                    ),
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -168,31 +214,50 @@ export default function AuthorizationCreate({ matches, authRequest, error }: Pro
                                     {/* Optional Disclosures */}
                                     {match.selectableDisclosures.length > 0 && (
                                         <div className="mb-4">
-                                            <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-[#706f6c] dark:text-[#A1A09A]">
+                                            <h3 className="mb-2 text-xs font-medium tracking-wide text-[#706f6c] uppercase dark:text-[#A1A09A]">
                                                 Optional Claims
                                             </h3>
                                             <div className="space-y-2">
-                                                {match.selectableDisclosures.map((d) => (
-                                                    <label
-                                                        key={d.index}
-                                                        className="flex cursor-pointer items-center gap-3 rounded-md border border-[#e3e3e0] p-3 hover:bg-[#f5f5f4] dark:border-[#3E3E3A] dark:hover:bg-[#1f1f1e]"
-                                                    >
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={!!checkedOptional[d.index]}
-                                                            onChange={() => toggleOptional(d.index)}
-                                                            className="accent-emerald-600"
-                                                        />
-                                                        <div>
-                                                            <span className="text-sm font-medium">{d.claimName}</span>
-                                                            <span className="ml-2 text-xs text-[#706f6c] dark:text-[#A1A09A]">
-                                                                {typeof d.claimValue === 'object'
-                                                                    ? JSON.stringify(d.claimValue)
-                                                                    : String(d.claimValue)}
-                                                            </span>
-                                                        </div>
-                                                    </label>
-                                                ))}
+                                                {match.selectableDisclosures.map(
+                                                    (d) => (
+                                                        <label
+                                                            key={d.index}
+                                                            className="flex cursor-pointer items-center gap-3 rounded-md border border-[#e3e3e0] p-3 hover:bg-[#f5f5f4] dark:border-[#3E3E3A] dark:hover:bg-[#1f1f1e]"
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={
+                                                                    !!checkedOptional[
+                                                                        d.index
+                                                                    ]
+                                                                }
+                                                                onChange={() =>
+                                                                    toggleOptional(
+                                                                        d.index,
+                                                                    )
+                                                                }
+                                                                className="accent-emerald-600"
+                                                            />
+                                                            <div>
+                                                                <span className="text-sm font-medium">
+                                                                    {
+                                                                        d.claimName
+                                                                    }
+                                                                </span>
+                                                                <span className="ml-2 text-xs text-[#706f6c] dark:text-[#A1A09A]">
+                                                                    {typeof d.claimValue ===
+                                                                    'object'
+                                                                        ? JSON.stringify(
+                                                                              d.claimValue,
+                                                                          )
+                                                                        : String(
+                                                                              d.claimValue,
+                                                                          )}
+                                                                </span>
+                                                            </div>
+                                                        </label>
+                                                    ),
+                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -200,11 +265,16 @@ export default function AuthorizationCreate({ matches, authRequest, error }: Pro
                                     {/* Errors */}
                                     {Object.keys(errors).length > 0 && (
                                         <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-                                            {Object.values(errors).map((msg, i) => (
-                                                <p key={i} className="text-xs text-red-600 dark:text-red-400">
-                                                    {msg}
-                                                </p>
-                                            ))}
+                                            {Object.values(errors).map(
+                                                (msg, i) => (
+                                                    <p
+                                                        key={i}
+                                                        className="text-xs text-red-600 dark:text-red-400"
+                                                    >
+                                                        {msg}
+                                                    </p>
+                                                ),
+                                            )}
                                         </div>
                                     )}
 
@@ -215,7 +285,9 @@ export default function AuthorizationCreate({ matches, authRequest, error }: Pro
                                             disabled={processing}
                                             className="rounded-md bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                                         >
-                                            {processing ? 'Submitting...' : 'Approve'}
+                                            {processing
+                                                ? 'Submitting...'
+                                                : 'Approve'}
                                         </button>
                                         <Link
                                             href="/wallet"

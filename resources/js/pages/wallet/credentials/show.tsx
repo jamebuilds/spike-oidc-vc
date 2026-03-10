@@ -37,7 +37,9 @@ export default function CredentialShow({ credential }: Props) {
                     <div className="rounded-lg border border-[#e3e3e0] bg-white p-6 shadow-sm dark:border-[#3E3E3A] dark:bg-[#161615]">
                         <div className="mb-6 flex items-start justify-between">
                             <div>
-                                <h1 className="text-xl font-semibold">{credential.type}</h1>
+                                <h1 className="text-xl font-semibold">
+                                    {credential.type}
+                                </h1>
                                 <p className="mt-1 text-sm text-[#706f6c] dark:text-[#A1A09A]">
                                     Issuer: {credential.issuer}
                                 </p>
@@ -54,45 +56,65 @@ export default function CredentialShow({ credential }: Props) {
                         <div className="mb-6 grid grid-cols-2 gap-4 text-sm">
                             {credential.issued_at && (
                                 <div>
-                                    <span className="text-[#706f6c] dark:text-[#A1A09A]">Issued:</span>{' '}
-                                    {new Date(credential.issued_at).toLocaleDateString()}
+                                    <span className="text-[#706f6c] dark:text-[#A1A09A]">
+                                        Issued:
+                                    </span>{' '}
+                                    {new Date(
+                                        credential.issued_at,
+                                    ).toLocaleDateString()}
                                 </div>
                             )}
                             {credential.expires_at && (
                                 <div>
-                                    <span className="text-[#706f6c] dark:text-[#A1A09A]">Expires:</span>{' '}
-                                    {new Date(credential.expires_at).toLocaleDateString()}
+                                    <span className="text-[#706f6c] dark:text-[#A1A09A]">
+                                        Expires:
+                                    </span>{' '}
+                                    {new Date(
+                                        credential.expires_at,
+                                    ).toLocaleDateString()}
                                 </div>
                             )}
                         </div>
 
                         {/* Disclosures */}
-                        <h2 className="mb-3 text-sm font-medium">Selectively Disclosable Claims</h2>
+                        <h2 className="mb-3 text-sm font-medium">
+                            Selectively Disclosable Claims
+                        </h2>
                         <div className="space-y-3">
-                            {credential.disclosure_mapping?.map((disclosure, index) => (
-                                <div
-                                    key={index}
-                                    className="rounded-md border border-[#e3e3e0] p-4 dark:border-[#3E3E3A]"
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <span className="text-sm font-medium">{disclosure.claimName}</span>
-                                        <span className="rounded bg-[#f5f5f4] px-2 py-0.5 text-xs text-[#A1A09A] dark:bg-[#1f1f1e]">
-                                            SD
-                                        </span>
+                            {credential.disclosure_mapping?.map(
+                                (disclosure, index) => (
+                                    <div
+                                        key={index}
+                                        className="rounded-md border border-[#e3e3e0] p-4 dark:border-[#3E3E3A]"
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <span className="text-sm font-medium">
+                                                {disclosure.claimName}
+                                            </span>
+                                            <span className="rounded bg-[#f5f5f4] px-2 py-0.5 text-xs text-[#A1A09A] dark:bg-[#1f1f1e]">
+                                                SD
+                                            </span>
+                                        </div>
+                                        <pre className="mt-2 overflow-x-auto text-xs text-[#706f6c] dark:text-[#A1A09A]">
+                                            {formatValue(disclosure.claimValue)}
+                                        </pre>
                                     </div>
-                                    <pre className="mt-2 overflow-x-auto text-xs text-[#706f6c] dark:text-[#A1A09A]">
-                                        {formatValue(disclosure.claimValue)}
-                                    </pre>
-                                </div>
-                            ))}
+                                ),
+                            )}
                         </div>
 
                         {/* Confirmation Key */}
                         {credential.cnf_jwk && (
                             <div className="mt-6">
-                                <h2 className="mb-3 text-sm font-medium">Confirmation Key (cnf)</h2>
+                                <h2 className="mb-3 text-sm font-medium">
+                                    Confirmation Key (cnf)
+                                </h2>
                                 <pre className="overflow-x-auto rounded-md bg-[#f5f5f4] p-3 text-xs text-[#706f6c] dark:bg-[#1f1f1e] dark:text-[#A1A09A]">
-                                    {JSON.stringify(credential.cnf_jwk, null, 2)}
+                                    {JSON.stringify(
+                                        credential.cnf_jwk,
+                                        null,
+                                        2,
+                                    )}
                                 </pre>
                             </div>
                         )}

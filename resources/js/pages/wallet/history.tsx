@@ -28,10 +28,14 @@ export default function PresentationHistory({ logs }: Props) {
                         </Link>
                     </div>
 
-                    <h1 className="mb-6 text-xl font-semibold">Presentation History</h1>
+                    <h1 className="mb-6 text-xl font-semibold">
+                        Presentation History
+                    </h1>
 
                     {logs.data.length === 0 ? (
-                        <p className="text-sm text-[#706f6c] dark:text-[#A1A09A]">No presentations yet.</p>
+                        <p className="text-sm text-[#706f6c] dark:text-[#A1A09A]">
+                            No presentations yet.
+                        </p>
                     ) : (
                         <div className="space-y-3">
                             {logs.data.map((log) => (
@@ -42,10 +46,12 @@ export default function PresentationHistory({ logs }: Props) {
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <p className="text-sm font-medium">
-                                                {log.credential?.type ?? 'Unknown Credential'}
+                                                {log.credential?.type ??
+                                                    'Unknown Credential'}
                                             </p>
                                             <p className="mt-0.5 text-xs text-[#706f6c] dark:text-[#A1A09A]">
-                                                Verifier: {log.verifier_client_id}
+                                                Verifier:{' '}
+                                                {log.verifier_client_id}
                                             </p>
                                         </div>
                                         <span
@@ -59,18 +65,22 @@ export default function PresentationHistory({ logs }: Props) {
                                         </span>
                                     </div>
                                     <div className="mt-2 flex flex-wrap gap-1.5">
-                                        {log.disclosed_claims.map((claim, i) => (
-                                            <span
-                                                key={i}
-                                                className="rounded bg-[#f5f5f4] px-2 py-0.5 text-xs text-[#706f6c] dark:bg-[#1f1f1e] dark:text-[#A1A09A]"
-                                            >
-                                                {claim}
-                                            </span>
-                                        ))}
+                                        {log.disclosed_claims.map(
+                                            (claim, i) => (
+                                                <span
+                                                    key={i}
+                                                    className="rounded bg-[#f5f5f4] px-2 py-0.5 text-xs text-[#706f6c] dark:bg-[#1f1f1e] dark:text-[#A1A09A]"
+                                                >
+                                                    {claim}
+                                                </span>
+                                            ),
+                                        )}
                                     </div>
                                     {log.submitted_at && (
                                         <p className="mt-2 text-xs text-[#A1A09A]">
-                                            {new Date(log.submitted_at).toLocaleString()}
+                                            {new Date(
+                                                log.submitted_at,
+                                            ).toLocaleString()}
                                         </p>
                                     )}
                                 </div>
