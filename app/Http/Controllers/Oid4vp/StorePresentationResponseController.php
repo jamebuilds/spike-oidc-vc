@@ -14,6 +14,7 @@ class StorePresentationResponseController extends Controller
     /** @var array<string, class-string> */
     private const FORMAT_VERIFIERS = [
         'vc+sd-jwt' => SdJwtVerifier::class,
+        'jwt_vp' => VpTokenVerifier::class,
         'jwt_vp_json' => VpTokenVerifier::class,
     ];
 
