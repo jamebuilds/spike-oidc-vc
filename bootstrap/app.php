@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             Route::middleware('web')
                 ->group(base_path('routes/oid4vp.php'));
+
+            Route::middleware('web')
+                ->group(base_path('routes/oid4vci.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -27,6 +30,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'oid4vp/*/response',
+            'oid4vci/token',
+            'oid4vci/credential',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
