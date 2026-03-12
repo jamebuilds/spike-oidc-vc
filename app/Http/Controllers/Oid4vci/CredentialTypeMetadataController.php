@@ -10,6 +10,7 @@ class CredentialTypeMetadataController extends Controller
     public function __invoke(): JsonResponse
     {
         return response()->json([
+            'vct' => config('oid4vci.issuer_url').'/'.config('oid4vci.credential_type', 'AccredifyEmployeePass'),
             'name' => 'Accredify Employee Pass',
             'description' => 'A demo employee pass credential issued as SD-JWT.',
             'claims' => [
