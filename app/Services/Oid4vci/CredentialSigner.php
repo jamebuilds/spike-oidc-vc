@@ -32,10 +32,9 @@ class CredentialSigner
             throw new RuntimeException('Invalid OID4VCI signing key: '.openssl_error_string());
         }
 
-        // Derive issuer DID and key fragment from signing key
+        // Derive issuer DID from signing key
         $issuerJwk = $this->extractPublicJwk($privateKey);
         $issuerDid = 'did:jwk:'.JwtParser::base64urlEncode(json_encode($issuerJwk));
-        $keyFragment = $issuerJwk['kid'];
 
         // Build disclosures for each subject claim
         $disclosures = [];
@@ -50,7 +49,7 @@ class CredentialSigner
         }
 
         $header = [
-            'kid' => $issuerDid.'#'.$keyFragment,
+            'kid' => $issuerDid.'#0',
             'typ' => 'vc+sd-jwt',
             'alg' => 'ES256',
         ];
@@ -89,7 +88,7 @@ class CredentialSigner
     /**
      * Extract the public key as a JWK from a private key resource.
      *
-     * @return array{kty: string, crv: string, kid: string, x: string, y: string}
+     * @return array{kty: string, crv: string, x: string, y: string}
      */
     private function extractPublicJwk(mixed $privateKey): array
     {
@@ -99,25 +98,11 @@ class CredentialSigner
             throw new RuntimeException('Signing key must be an EC key');
         }
 
-        $x = JwtParser::base64urlEncode($details['ec']['x']);
-        $y = JwtParser::base64urlEncode($details['ec']['y']);
-
-        // JWK thumbprint (RFC 7638) as kid — canonical JSON with sorted keys
-        $thumbprintInput = json_encode([
-            'crv' => 'P-256',
-            'kty' => 'EC',
-            'x' => $x,
-            'y' => $y,
-        ]);
-
-        $kid = JwtParser::base64urlEncode(hash('sha256', $thumbprintInput, true));
-
         return [
             'kty' => 'EC',
             'crv' => 'P-256',
-            'kid' => $kid,
-            'x' => $x,
-            'y' => $y,
+            'x' => JwtParser::base64urlEncode($details['ec']['x']),
+            'y' => JwtParser::base64urlEncode($details['ec']['y']),
         ];
     }
 
