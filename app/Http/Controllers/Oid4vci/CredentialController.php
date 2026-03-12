@@ -8,6 +8,7 @@ use App\Services\Oid4vci\IssuanceSession;
 use App\Services\Oid4vp\SdJwt\JwtParser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CredentialController extends Controller
 {
@@ -17,6 +18,29 @@ class CredentialController extends Controller
     ) {}
 
     public function __invoke(Request $request): JsonResponse
+    {
+        Log::info('OID4VCI Credential request received', [
+            'has_bearer' => ! empty($request->bearerToken()),
+            'has_proof' => ! empty($request->input('proof')),
+            'content_type' => $request->header('Content-Type'),
+        ]);
+
+        try {
+            return $this->handleCredentialRequest($request);
+        } catch (\Throwable $e) {
+            Log::error('OID4VCI Credential error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'error' => 'server_error',
+                'error_description' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function handleCredentialRequest(Request $request): JsonResponse
     {
         // Extract Bearer token
         $accessToken = $request->bearerToken();

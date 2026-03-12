@@ -6,11 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Services\Oid4vci\IssuanceSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TokenController extends Controller
 {
     public function __invoke(Request $request, IssuanceSession $session): JsonResponse
     {
+        Log::info('OID4VCI Token request', [
+            'grant_type' => $request->input('grant_type'),
+            'has_code' => ! empty($request->input('pre-authorized_code')),
+        ]);
+
         $grantType = $request->input('grant_type');
 
         if ($grantType !== 'urn:ietf:params:oauth:grant-type:pre-authorized_code') {
