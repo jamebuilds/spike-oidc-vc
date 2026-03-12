@@ -13,9 +13,10 @@ class CredentialSigner
      * All subject claims are selectively disclosable.
      *
      * @param  array<string, mixed>  $subjectClaims
-     * @param  array<string, mixed>|null  $holderJwk  Holder's public key JWK for key binding (cnf)
+     * @param  array<string, mixed>|null  $holderJwk  Holder's public key JWK for cnf.jwk binding
+     * @param  string|null  $holderKeyRef  Holder's DID URL for cnf.kid binding
      */
-    public function sign(array $subjectClaims, string $holderDid, ?array $holderJwk = null): string
+    public function sign(array $subjectClaims, string $holderDid, ?array $holderJwk = null, ?string $holderKeyRef = null): string
     {
         $keyPem = config('oid4vci.signing_key_pem');
 
@@ -65,8 +66,10 @@ class CredentialSigner
             '_sd' => $sdHashes,
         ];
 
-        // Add holder key binding (cnf) if JWK is available
-        if ($holderJwk !== null) {
+        // Add holder key binding (cnf) — use kid for DID binding, jwk for JWK binding
+        if ($holderKeyRef !== null) {
+            $payload['cnf'] = ['kid' => $holderKeyRef];
+        } elseif ($holderJwk !== null) {
             $payload['cnf'] = ['jwk' => $holderJwk];
         }
 

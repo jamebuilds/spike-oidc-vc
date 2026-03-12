@@ -104,19 +104,33 @@ class CredentialController extends Controller
             ], 400);
         }
 
-        // Extract holder DID from proof header (kid or iss)
-        $holderDid = $proofHeader['kid'] ?? $proofPayload['iss'] ?? 'did:key:unknown';
+        // Extract holder key info from proof header
+        $proofKid = $proofHeader['kid'] ?? null;
+        $holderDid = $proofKid ?? $proofPayload['iss'] ?? 'did:key:unknown';
 
-        // Strip key fragment from kid (e.g., "did:key:z123#z123" -> "did:key:z123")
+        // Strip key fragment from DID for display/storage
         if (str_contains($holderDid, '#')) {
             $holderDid = substr($holderDid, 0, strpos($holderDid, '#'));
         }
 
-        // Extract holder JWK for key binding (cnf claim)
-        $holderJwk = $this->extractHolderJwk($proofHeader, $holderDid);
+        // Use cnf.kid (DID URL) when proof used DID binding, cnf.jwk otherwise.
+        // Wallets like Paradym/Credo use DID binding and only populate the
+        // jwkThumbprintKmsKeyIdMapping for JWK binding — cnf.jwk causes a
+        // "key not in credential request" error for DID-bound proofs.
+        $useDid = $proofKid !== null && str_starts_with($proofKid, 'did:');
+        $holderJwk = null;
+
+        if ($useDid) {
+            // DID binding: pass the full DID URL (with fragment) for cnf.kid
+            $holderKeyRef = $proofKid;
+        } else {
+            // JWK binding: extract raw JWK for cnf.jwk
+            $holderJwk = $this->extractHolderJwk($proofHeader, $holderDid);
+            $holderKeyRef = null;
+        }
 
         // Sign and issue the SD-JWT credential
-        $credential = $this->signer->sign($offer['subject_claims'], $holderDid, $holderJwk);
+        $credential = $this->signer->sign($offer['subject_claims'], $holderDid, $holderJwk, $holderKeyRef);
 
         // Mark issuance as complete
         $this->session->complete($tokenData['offer_id'], [
