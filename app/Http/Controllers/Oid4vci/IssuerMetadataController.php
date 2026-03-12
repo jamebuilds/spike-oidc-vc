@@ -27,13 +27,6 @@ class IssuerMetadataController extends Controller
                             'proof_signing_alg_values_supported' => ['ES256'],
                         ],
                     ],
-                    'claims' => [
-                        'employeeId' => ['display' => [['name' => 'Employee ID', 'locale' => 'en']]],
-                        'firstName' => ['display' => [['name' => 'First Name', 'locale' => 'en']]],
-                        'lastName' => ['display' => [['name' => 'Last Name', 'locale' => 'en']]],
-                        'dateOfBirth' => ['display' => [['name' => 'Date of Birth', 'locale' => 'en']]],
-                        'nric' => ['display' => [['name' => 'NRIC', 'locale' => 'en']]],
-                    ],
                     'display' => [
                         [
                             'name' => 'Accredify Employee Pass',

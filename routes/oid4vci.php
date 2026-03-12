@@ -23,3 +23,7 @@ Route::get('/.well-known/openid-credential-issuer', IssuerMetadataController::cl
 
 Route::get('/AccredifyEmployeePass', CredentialTypeMetadataController::class)
     ->name('oid4vci.type-metadata');
+
+// Walt.id resolves VCT type metadata via /.well-known/vct/<path>
+Route::get('/.well-known/vct/AccredifyEmployeePass', CredentialTypeMetadataController::class)
+    ->name('oid4vci.type-metadata-wellknown');
