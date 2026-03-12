@@ -118,6 +118,13 @@ class CredentialController extends Controller
             'credential_type' => config('oid4vci.credential_type', 'AccredifyEmployeePass'),
         ]);
 
+        Log::info('OID4VCI Credential issued', [
+            'holder_did' => $holderDid,
+            'has_cnf' => $holderJwk !== null,
+            'credential_length' => strlen($credential),
+            'credential_preview' => substr($credential, 0, 100).'...',
+        ]);
+
         return response()->json([
             'format' => 'vc+sd-jwt',
             'credential' => $credential,
