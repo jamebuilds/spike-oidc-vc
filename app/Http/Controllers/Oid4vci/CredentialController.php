@@ -23,7 +23,12 @@ class CredentialController extends Controller
             'has_bearer' => ! empty($request->bearerToken()),
             'has_proof' => ! empty($request->input('proof')),
             'has_proofs' => ! empty($request->input('proofs')),
+            'has_credential_configuration_id' => ! empty($request->input('credential_configuration_id')),
+            'has_format' => ! empty($request->input('format')),
+            'credential_configuration_id' => $request->input('credential_configuration_id'),
+            'format' => $request->input('format'),
             'content_type' => $request->header('Content-Type'),
+            'request_keys' => array_keys($request->all()),
         ]);
 
         try {
