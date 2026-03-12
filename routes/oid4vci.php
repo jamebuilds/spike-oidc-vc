@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Oid4vci\CredentialController;
 use App\Http\Controllers\Oid4vci\CredentialOfferController;
+use App\Http\Controllers\Oid4vci\CredentialTypeMetadataController;
 use App\Http\Controllers\Oid4vci\GetCredentialOfferController;
 use App\Http\Controllers\Oid4vci\GetIssuanceStatusController;
 use App\Http\Controllers\Oid4vci\IssuerMetadataController;
@@ -19,3 +20,6 @@ Route::get('/oid4vci/{id}/status', GetIssuanceStatusController::class)->name('oi
 
 Route::get('/.well-known/openid-credential-issuer', IssuerMetadataController::class)
     ->name('oid4vci.metadata');
+
+Route::get('/AccredifyEmployeePass', CredentialTypeMetadataController::class)
+    ->name('oid4vci.type-metadata');
