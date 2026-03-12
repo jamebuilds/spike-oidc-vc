@@ -12,7 +12,6 @@ class CredentialTypeMetadataController extends Controller
         return response()->json([
             'name' => 'Accredify Employee Pass',
             'description' => 'A demo employee pass credential issued as SD-JWT.',
-            'extends' => 'https://www.w3.org/2018/credentials#VerifiableCredential',
             'claims' => [
                 ['path' => ['employeeId'], 'display' => [['lang' => 'en', 'label' => 'Employee ID']]],
                 ['path' => ['firstName'], 'display' => [['lang' => 'en', 'label' => 'First Name']]],
