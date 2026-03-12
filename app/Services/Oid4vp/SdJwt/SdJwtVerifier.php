@@ -28,10 +28,11 @@ class SdJwtVerifier
 
             // 3. Verify ES256 signature (if not skipped)
             if (! config('oid4vp.skip_signature_verification')) {
-                $publicKeyPem = config('oid4vp.issuer_public_key');
+                $issuer = $payload['iss'] ?? '';
+                $publicKeyPem = $this->resolveIssuerPublicKey($issuer);
 
                 if (empty($publicKeyPem)) {
-                    $errors[] = 'No issuer public key configured for signature verification';
+                    $errors[] = 'Could not resolve issuer public key from iss: '.$issuer;
                 } else {
                     $verified = $this->jwtParser->verifySignature(
                         $issuerJwt['signed_input'],
@@ -93,5 +94,28 @@ class SdJwtVerifier
             nonce: $nonce,
             errors: $errors,
         );
+    }
+
+    /**
+     * Resolve the issuer's public key from the iss claim.
+     *
+     * For did:jwk: issuers, the JWK is embedded in the DID itself.
+     * Falls back to the static config key for other issuer types.
+     */
+    private function resolveIssuerPublicKey(string $issuer): string
+    {
+        if (! str_starts_with($issuer, 'did:jwk:')) {
+            throw new \InvalidArgumentException('Unsupported issuer DID method: '.$issuer);
+        }
+
+        $jwkBase64url = substr($issuer, strlen('did:jwk:'));
+        $jwkJson = JwtParser::base64urlDecode($jwkBase64url);
+        $jwk = json_decode($jwkJson, true);
+
+        if (! is_array($jwk)) {
+            throw new \InvalidArgumentException('Failed to decode JWK from issuer DID: '.$issuer);
+        }
+
+        return $this->jwtParser->jwkToPem($jwk);
     }
 }

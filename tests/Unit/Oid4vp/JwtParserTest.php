@@ -91,6 +91,33 @@ describe('ES256 signature verification', function () {
 
         $this->parser->verifySignature('test', 'short', $details['key']);
     })->throws(InvalidArgumentException::class, 'expected 64 bytes');
+
+    it('verifies a signature using a public key resolved from did:jwk:', function () {
+        $key = generateEcKey();
+        $details = openssl_pkey_get_details($key);
+
+        // Sign
+        $data = 'test-signing-input';
+        openssl_sign($data, $derSig, $key, OPENSSL_ALGO_SHA256);
+        $rawSig = derToRaw($derSig);
+
+        // Build did:jwk: (same as CredentialSigner::extractPublicJwk + DID construction)
+        $jwk = [
+            'kty' => 'EC',
+            'crv' => 'P-256',
+            'x' => JwtParser::base64urlEncode($details['ec']['x']),
+            'y' => JwtParser::base64urlEncode($details['ec']['y']),
+        ];
+        $didJwk = 'did:jwk:'.JwtParser::base64urlEncode(json_encode($jwk));
+
+        // Resolve public key from did:jwk: (same as SdJwtVerifier::resolveIssuerPublicKey)
+        $jwkBase64url = substr($didJwk, strlen('did:jwk:'));
+        $resolvedJwk = json_decode(JwtParser::base64urlDecode($jwkBase64url), true);
+        $resolvedPem = $this->parser->jwkToPem($resolvedJwk);
+
+        // Verify with the resolved key
+        expect($this->parser->verifySignature($data, $rawSig, $resolvedPem))->toBeTrue();
+    });
 });
 
 describe('jwkToPem', function () {
