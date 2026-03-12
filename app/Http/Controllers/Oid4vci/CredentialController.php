@@ -69,8 +69,9 @@ class CredentialController extends Controller
 
         $offer = $this->session->findOrFail($tokenData['offer_id']);
 
-        // Detect Draft 14 by presence of credential_configuration_id (Draft 13 uses format instead)
-        $usedDraft14 = ! empty($request->input('credential_configuration_id'));
+        // Always use Draft 14 response format — our metadata advertises Draft 14,
+        // so all connecting wallets expect the Draft 14 credentials array response.
+        $usedDraft14 = true;
         $proofs = $request->input('proofs');
         $proof = $request->input('proof');
 
