@@ -22,7 +22,6 @@ class CredentialController extends Controller
         Log::info('OID4VCI Credential request received', [
             'has_bearer' => ! empty($request->bearerToken()),
             'has_proof' => ! empty($request->input('proof')),
-            'has_proofs' => ! empty($request->input('proofs')),
             'has_credential_configuration_id' => ! empty($request->input('credential_configuration_id')),
             'has_format' => ! empty($request->input('format')),
             'credential_configuration_id' => $request->input('credential_configuration_id'),
@@ -69,17 +68,9 @@ class CredentialController extends Controller
 
         $offer = $this->session->findOrFail($tokenData['offer_id']);
 
-        // Always use Draft 14 response format — our metadata advertises Draft 14,
-        // so all connecting wallets expect the Draft 14 credentials array response.
-        $usedDraft14 = true;
-        $proofs = $request->input('proofs');
         $proof = $request->input('proof');
 
-        if (! empty($proofs) && ! empty($proofs['jwt'][0])) {
-            // Draft 14: "proofs": { "jwt": ["eyJ..."] }
-            $proofJwt = $proofs['jwt'][0];
-        } elseif (! empty($proof) && ($proof['proof_type'] ?? null) === 'jwt' && ! empty($proof['jwt'])) {
-            // Draft 13: "proof": { "proof_type": "jwt", "jwt": "eyJ..." }
+        if (! empty($proof) && ($proof['proof_type'] ?? null) === 'jwt' && ! empty($proof['jwt'])) {
             $proofJwt = $proof['jwt'];
         } else {
             return response()->json([
@@ -144,25 +135,8 @@ class CredentialController extends Controller
         Log::info('OID4VCI Credential issued', [
             'holder_did' => $holderDid,
             'has_cnf' => $holderJwk !== null,
-            'draft' => $usedDraft14 ? '14' : '13',
         ]);
 
-        // Return the correct response format based on which proof format was used
-        if ($usedDraft14) {
-            // Draft 14: return "credentials" array
-            return response()->json([
-                'credentials' => [
-                    [
-                        'credential' => $credential,
-                        'format' => 'vc+sd-jwt',
-                    ],
-                ],
-                'c_nonce' => $newNonce,
-                'c_nonce_expires_in' => 300,
-            ]);
-        }
-
-        // Draft 13: return singular "credential"
         return response()->json([
             'format' => 'vc+sd-jwt',
             'credential' => $credential,
