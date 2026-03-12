@@ -64,15 +64,14 @@ class CredentialController extends Controller
 
         $offer = $this->session->findOrFail($tokenData['offer_id']);
 
-        // Extract proof JWT - support both Draft 14 (proofs plural) and Draft 13 (proof singular)
-        $usedDraft14 = false;
+        // Detect Draft 14 by presence of credential_configuration_id (Draft 13 uses format instead)
+        $usedDraft14 = ! empty($request->input('credential_configuration_id'));
         $proofs = $request->input('proofs');
         $proof = $request->input('proof');
 
         if (! empty($proofs) && ! empty($proofs['jwt'][0])) {
             // Draft 14: "proofs": { "jwt": ["eyJ..."] }
             $proofJwt = $proofs['jwt'][0];
-            $usedDraft14 = true;
         } elseif (! empty($proof) && ($proof['proof_type'] ?? null) === 'jwt' && ! empty($proof['jwt'])) {
             // Draft 13: "proof": { "proof_type": "jwt", "jwt": "eyJ..." }
             $proofJwt = $proof['jwt'];
