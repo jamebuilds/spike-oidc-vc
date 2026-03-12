@@ -34,7 +34,7 @@ class CredentialSigner
 
         // Derive issuer DID from signing key
         $issuerJwk = $this->extractPublicJwk($privateKey);
-        $issuerDid = 'did:jwk:'.JwtParser::base64urlEncode(json_encode($issuerJwk));
+        $issuerDid = 'did:jwk:'.JwtParser::base64urlEncode(json_encode($issuerJwk, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
         // Build disclosures for each subject claim
         $disclosures = [];
@@ -42,7 +42,7 @@ class CredentialSigner
 
         foreach ($subjectClaims as $name => $value) {
             $salt = JwtParser::base64urlEncode(random_bytes(16));
-            $disclosureJson = json_encode([$salt, $name, $value]);
+            $disclosureJson = json_encode([$salt, $name, $value], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             $disclosure = JwtParser::base64urlEncode($disclosureJson);
             $disclosures[] = $disclosure;
             $sdHashes[] = JwtParser::base64urlEncode(hash('sha256', $disclosure, true));
@@ -70,8 +70,9 @@ class CredentialSigner
             $payload['cnf'] = ['jwk' => $holderJwk];
         }
 
-        $headerB64 = JwtParser::base64urlEncode(json_encode($header));
-        $payloadB64 = JwtParser::base64urlEncode(json_encode($payload));
+        $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+        $headerB64 = JwtParser::base64urlEncode(json_encode($header, $jsonFlags));
+        $payloadB64 = JwtParser::base64urlEncode(json_encode($payload, $jsonFlags));
         $signingInput = $headerB64.'.'.$payloadB64;
 
         openssl_sign($signingInput, $derSig, $privateKey, OPENSSL_ALGO_SHA256);
@@ -101,8 +102,8 @@ class CredentialSigner
         return [
             'kty' => 'EC',
             'crv' => 'P-256',
-            'x' => JwtParser::base64urlEncode($details['ec']['x']),
-            'y' => JwtParser::base64urlEncode($details['ec']['y']),
+            'x' => JwtParser::base64urlEncode(str_pad($details['ec']['x'], 32, "\x00", STR_PAD_LEFT)),
+            'y' => JwtParser::base64urlEncode(str_pad($details['ec']['y'], 32, "\x00", STR_PAD_LEFT)),
         ];
     }
 

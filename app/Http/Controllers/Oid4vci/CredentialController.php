@@ -121,8 +121,6 @@ class CredentialController extends Controller
         Log::info('OID4VCI Credential issued', [
             'holder_did' => $holderDid,
             'has_cnf' => $holderJwk !== null,
-            'credential_length' => strlen($credential),
-            'credential_preview' => substr($credential, 0, 100).'...',
         ]);
 
         return response()->json([

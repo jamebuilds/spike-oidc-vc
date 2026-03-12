@@ -67,6 +67,10 @@ class JwtParser
         $x = self::base64urlDecode($jwk['x']);
         $y = self::base64urlDecode($jwk['y']);
 
+        // Zero-pad to 32 bytes — some implementations omit leading zeros
+        $x = str_pad($x, 32, "\x00", STR_PAD_LEFT);
+        $y = str_pad($y, 32, "\x00", STR_PAD_LEFT);
+
         if (strlen($x) !== 32 || strlen($y) !== 32) {
             throw new \InvalidArgumentException('Invalid EC P-256 key coordinates');
         }
