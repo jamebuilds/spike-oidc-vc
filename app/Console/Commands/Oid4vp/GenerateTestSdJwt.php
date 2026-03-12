@@ -144,10 +144,11 @@ class GenerateTestSdJwt extends Command
     private function buildDisclosures(): array
     {
         $claims = [
-            ['given_name', 'John'],
-            ['family_name', 'Doe'],
-            ['birthdate', '1990-01-15'],
-            ['age_equal_or_over', ['18' => true, '21' => true, '65' => false]],
+            ['employeeId', 'EMP-TEST1234'],
+            ['firstName', 'Jane'],
+            ['lastName', 'Doe'],
+            ['dateOfBirth', '1992-07-20'],
+            ['nric', 'S9012345A'],
         ];
 
         return array_map(function (array $claim): string {

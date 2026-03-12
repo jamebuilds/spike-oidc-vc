@@ -126,13 +126,36 @@ export default function Create() {
             <Head title="OID4VP Credential Request" />
             <div className="flex min-h-screen flex-col items-center justify-center bg-[#FDFDFC] p-6 text-[#1b1b18] dark:bg-[#0a0a0a] dark:text-[#EDEDEC]">
                 <div className="w-full max-w-lg rounded-lg bg-white p-8 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
+                    <a href="/" className="mb-4 inline-block text-xs text-[#706f6c] hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:text-[#EDEDEC]">&larr; Home</a>
                     <h1 className="mb-2 text-xl font-semibold">
                         OID4VP Credential Request
                     </h1>
-                    <p className="mb-6 text-sm text-[#706f6c] dark:text-[#A1A09A]">
+                    <p className="mb-4 text-sm text-[#706f6c] dark:text-[#A1A09A]">
                         Request a verifiable credential presentation via QR
                         code or deep link.
                     </p>
+
+                    <div className="mb-6 rounded-md bg-[#f5f5f4] p-4 dark:bg-[#1a1a19]">
+                        <p className="mb-1 text-xs font-medium text-[#706f6c] dark:text-[#A1A09A]">
+                            Credential type
+                        </p>
+                        <p className="mb-3 font-mono text-sm">
+                            AccredifyEmployeePass <span className="text-xs text-[#706f6c] dark:text-[#A1A09A]">(SD-JWT)</span>
+                        </p>
+                        <p className="mb-1 text-xs font-medium text-[#706f6c] dark:text-[#A1A09A]">
+                            Requested claims
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {['employeeId', 'firstName', 'lastName', 'dateOfBirth', 'nric'].map((claim) => (
+                                <span
+                                    key={claim}
+                                    className="rounded bg-[#e5e5e3] px-2 py-0.5 font-mono text-xs dark:bg-[#2a2a28]"
+                                >
+                                    {claim}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
 
                     {error && (
                         <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">

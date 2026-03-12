@@ -82,8 +82,11 @@ class CredentialController extends Controller
             $holderDid = substr($holderDid, 0, strpos($holderDid, '#'));
         }
 
-        // Sign and issue the credential
-        $credential = $this->signer->sign($offer['subject_claims'], $holderDid);
+        // Extract holder JWK for key binding (cnf claim)
+        $holderJwk = $this->extractHolderJwk($proofHeader, $holderDid);
+
+        // Sign and issue the SD-JWT credential
+        $credential = $this->signer->sign($offer['subject_claims'], $holderDid, $holderJwk);
 
         // Mark issuance as complete
         $this->session->complete($tokenData['offer_id'], [
@@ -92,8 +95,34 @@ class CredentialController extends Controller
         ]);
 
         return response()->json([
-            'format' => 'jwt_vc_json',
+            'format' => 'vc+sd-jwt',
             'credential' => $credential,
         ]);
+    }
+
+    /**
+     * Extract the holder's public key JWK from the proof JWT header.
+     *
+     * @param  array<string, mixed>  $proofHeader
+     * @return array<string, mixed>|null
+     */
+    private function extractHolderJwk(array $proofHeader, string $holderDid): ?array
+    {
+        // 1. Direct JWK in header
+        if (! empty($proofHeader['jwk']) && is_array($proofHeader['jwk'])) {
+            return $proofHeader['jwk'];
+        }
+
+        // 2. Decode from did:jwk
+        if (str_starts_with($holderDid, 'did:jwk:')) {
+            $encoded = substr($holderDid, strlen('did:jwk:'));
+            $decoded = json_decode(JwtParser::base64urlDecode($encoded), true);
+
+            if (is_array($decoded) && isset($decoded['kty'])) {
+                return $decoded;
+            }
+        }
+
+        return null;
     }
 }

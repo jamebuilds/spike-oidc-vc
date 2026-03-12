@@ -25,12 +25,11 @@ class CredentialOfferController extends Controller
         $id = Str::uuid()->toString();
 
         $subjectClaims = [
-            'accountId' => 'ACC-'.strtoupper(Str::random(8)),
-            'IBAN' => 'DE89370400440532013000',
-            'BIC' => 'COBADEFFXXX',
-            'givenName' => 'Max',
-            'familyName' => 'Mustermann',
-            'birthDate' => '1990-01-15',
+            'employeeId' => 'EMP-'.strtoupper(Str::random(8)),
+            'firstName' => 'Jane',
+            'lastName' => 'Doe',
+            'dateOfBirth' => '1992-07-20',
+            'nric' => 'S9012345A',
         ];
 
         $this->session->create($id, $subjectClaims);

@@ -16,25 +16,24 @@ class IssuerMetadataController extends Controller
             'credential_endpoint' => $issuerUrl.'/oid4vci/credential',
             'token_endpoint' => $issuerUrl.'/oid4vci/token',
             'credential_configurations_supported' => [
-                config('oid4vci.credential_type', 'BankId') => [
-                    'format' => 'jwt_vc_json',
-                    'scope' => 'BankId',
-                    'cryptographic_binding_methods_supported' => ['did:key'],
+                config('oid4vci.credential_type', 'AccredifyEmployeePass') => [
+                    'format' => 'vc+sd-jwt',
+                    'scope' => 'AccredifyEmployeePass',
+                    'cryptographic_binding_methods_supported' => ['did:jwk', 'did:key'],
                     'credential_signing_alg_values_supported' => ['ES256'],
                     'credential_definition' => [
-                        'type' => ['VerifiableCredential', config('oid4vci.credential_type', 'BankId')],
+                        'type' => ['VerifiableCredential', config('oid4vci.credential_type', 'AccredifyEmployeePass')],
                         'credentialSubject' => [
-                            'accountId' => ['display' => [['name' => 'Account ID', 'locale' => 'en']]],
-                            'IBAN' => ['display' => [['name' => 'IBAN', 'locale' => 'en']]],
-                            'BIC' => ['display' => [['name' => 'BIC', 'locale' => 'en']]],
-                            'givenName' => ['display' => [['name' => 'Given Name', 'locale' => 'en']]],
-                            'familyName' => ['display' => [['name' => 'Family Name', 'locale' => 'en']]],
-                            'birthDate' => ['display' => [['name' => 'Date of Birth', 'locale' => 'en']]],
+                            'employeeId' => ['display' => [['name' => 'Employee ID', 'locale' => 'en']]],
+                            'firstName' => ['display' => [['name' => 'First Name', 'locale' => 'en']]],
+                            'lastName' => ['display' => [['name' => 'Last Name', 'locale' => 'en']]],
+                            'dateOfBirth' => ['display' => [['name' => 'Date of Birth', 'locale' => 'en']]],
+                            'nric' => ['display' => [['name' => 'NRIC', 'locale' => 'en']]],
                         ],
                     ],
                     'display' => [
                         [
-                            'name' => 'Bank ID Credential',
+                            'name' => 'Accredify Employee Pass',
                             'locale' => 'en',
                         ],
                     ],
@@ -42,7 +41,7 @@ class IssuerMetadataController extends Controller
             ],
             'display' => [
                 [
-                    'name' => 'QCC Spike Issuer',
+                    'name' => 'Accredify Spike Issuer',
                     'locale' => 'en',
                 ],
             ],

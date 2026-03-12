@@ -108,13 +108,40 @@ export default function Create() {
             <Head title="OID4VCI Issue Credential" />
             <div className="flex min-h-screen flex-col items-center justify-center bg-[#FDFDFC] p-6 text-[#1b1b18] dark:bg-[#0a0a0a] dark:text-[#EDEDEC]">
                 <div className="w-full max-w-lg rounded-lg bg-white p-8 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]">
+                    <a href="/" className="mb-4 inline-block text-xs text-[#706f6c] hover:text-[#1b1b18] dark:text-[#A1A09A] dark:hover:text-[#EDEDEC]">&larr; Home</a>
                     <h1 className="mb-2 text-xl font-semibold">
                         OID4VCI Issue Credential
                     </h1>
-                    <p className="mb-6 text-sm text-[#706f6c] dark:text-[#A1A09A]">
+                    <p className="mb-4 text-sm text-[#706f6c] dark:text-[#A1A09A]">
                         Issue a verifiable credential to a wallet via QR code or
                         deep link.
                     </p>
+
+                    <div className="mb-6 rounded-md bg-[#f5f5f4] p-4 dark:bg-[#1a1a19]">
+                        <p className="mb-1 text-xs font-medium text-[#706f6c] dark:text-[#A1A09A]">
+                            Credential type
+                        </p>
+                        <p className="mb-3 font-mono text-sm">
+                            AccredifyEmployeePass <span className="text-xs text-[#706f6c] dark:text-[#A1A09A]">(SD-JWT)</span>
+                        </p>
+                        <p className="mb-2 text-xs font-medium text-[#706f6c] dark:text-[#A1A09A]">
+                            Demo claims to be issued
+                        </p>
+                        <div className="divide-y divide-[#e5e5e3] rounded-md bg-white dark:divide-[#3E3E3A] dark:bg-[#161615]">
+                            {[
+                                ['employeeId', 'EMP-XXXXXXXX (random)'],
+                                ['firstName', 'Jane'],
+                                ['lastName', 'Doe'],
+                                ['dateOfBirth', '1992-07-20'],
+                                ['nric', 'S9012345A'],
+                            ].map(([key, value]) => (
+                                <div key={key} className="flex items-center justify-between gap-4 px-3 py-1.5">
+                                    <span className="font-mono text-xs text-[#706f6c] dark:text-[#A1A09A]">{key}</span>
+                                    <span className="font-mono text-xs">{value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
                     {error && (
                         <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">

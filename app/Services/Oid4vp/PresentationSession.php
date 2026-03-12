@@ -49,7 +49,7 @@ class PresentationSession
         return [
             'id' => $id,
             'input_descriptors' => [[
-                'id' => 'bankid_credential',
+                'id' => 'accredify_employee_pass',
                 'format' => [
                     'vc+sd-jwt' => (object) [],
                     'jwt_vp' => (object) [],
@@ -58,18 +58,17 @@ class PresentationSession
                 'constraints' => [
                     'fields' => [
                         [
-                            'path' => ['$.vc.type', '$.type'],
+                            'path' => ['$.vct', '$.vc.type', '$.type'],
                             'filter' => [
                                 'type' => 'string',
-                                'pattern' => 'BankId',
+                                'pattern' => 'AccredifyEmployeePass',
                             ],
                         ],
-                        ['path' => ['$.vc.credentialSubject.accountId', '$.credentialSubject.accountId']],
-                        ['path' => ['$.vc.credentialSubject.IBAN', '$.credentialSubject.IBAN']],
-                        ['path' => ['$.vc.credentialSubject.BIC', '$.credentialSubject.BIC']],
-                        ['path' => ['$.vc.credentialSubject.givenName', '$.credentialSubject.givenName']],
-                        ['path' => ['$.vc.credentialSubject.familyName', '$.credentialSubject.familyName']],
-                        ['path' => ['$.vc.credentialSubject.birthDate', '$.credentialSubject.birthDate']],
+                        ['path' => ['$.employeeId', '$.vc.credentialSubject.employeeId', '$.credentialSubject.employeeId']],
+                        ['path' => ['$.firstName', '$.vc.credentialSubject.firstName', '$.credentialSubject.firstName']],
+                        ['path' => ['$.lastName', '$.vc.credentialSubject.lastName', '$.credentialSubject.lastName']],
+                        ['path' => ['$.dateOfBirth', '$.vc.credentialSubject.dateOfBirth', '$.credentialSubject.dateOfBirth']],
+                        ['path' => ['$.nric', '$.vc.credentialSubject.nric', '$.credentialSubject.nric']],
                     ],
                 ],
             ]],
