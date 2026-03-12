@@ -22,6 +22,11 @@ class IssuerMetadataController extends Controller
                     'scope' => 'AccredifyEmployeePass',
                     'cryptographic_binding_methods_supported' => ['did:jwk', 'did:key'],
                     'credential_signing_alg_values_supported' => ['ES256'],
+                    'proof_types_supported' => [
+                        'jwt' => [
+                            'proof_signing_alg_values_supported' => ['ES256'],
+                        ],
+                    ],
                     'claims' => [
                         'employeeId' => ['display' => [['name' => 'Employee ID', 'locale' => 'en']]],
                         'firstName' => ['display' => [['name' => 'First Name', 'locale' => 'en']]],
