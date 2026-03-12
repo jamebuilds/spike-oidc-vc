@@ -18,18 +18,16 @@ class IssuerMetadataController extends Controller
             'credential_configurations_supported' => [
                 config('oid4vci.credential_type', 'AccredifyEmployeePass') => [
                     'format' => 'vc+sd-jwt',
+                    'vct' => $issuerUrl.'/'.config('oid4vci.credential_type', 'AccredifyEmployeePass'),
                     'scope' => 'AccredifyEmployeePass',
                     'cryptographic_binding_methods_supported' => ['did:jwk', 'did:key'],
                     'credential_signing_alg_values_supported' => ['ES256'],
-                    'credential_definition' => [
-                        'type' => ['VerifiableCredential', config('oid4vci.credential_type', 'AccredifyEmployeePass')],
-                        'credentialSubject' => [
-                            'employeeId' => ['display' => [['name' => 'Employee ID', 'locale' => 'en']]],
-                            'firstName' => ['display' => [['name' => 'First Name', 'locale' => 'en']]],
-                            'lastName' => ['display' => [['name' => 'Last Name', 'locale' => 'en']]],
-                            'dateOfBirth' => ['display' => [['name' => 'Date of Birth', 'locale' => 'en']]],
-                            'nric' => ['display' => [['name' => 'NRIC', 'locale' => 'en']]],
-                        ],
+                    'claims' => [
+                        'employeeId' => ['display' => [['name' => 'Employee ID', 'locale' => 'en']]],
+                        'firstName' => ['display' => [['name' => 'First Name', 'locale' => 'en']]],
+                        'lastName' => ['display' => [['name' => 'Last Name', 'locale' => 'en']]],
+                        'dateOfBirth' => ['display' => [['name' => 'Date of Birth', 'locale' => 'en']]],
+                        'nric' => ['display' => [['name' => 'NRIC', 'locale' => 'en']]],
                     ],
                     'display' => [
                         [

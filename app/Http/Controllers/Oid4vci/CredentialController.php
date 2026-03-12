@@ -91,7 +91,7 @@ class CredentialController extends Controller
         // Mark issuance as complete
         $this->session->complete($tokenData['offer_id'], [
             'holder_did' => $holderDid,
-            'credential_type' => config('oid4vci.credential_type', 'BankId'),
+            'credential_type' => config('oid4vci.credential_type', 'AccredifyEmployeePass'),
         ]);
 
         return response()->json([
