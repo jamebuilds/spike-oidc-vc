@@ -22,6 +22,7 @@ class CredentialController extends Controller
         Log::info('OID4VCI Credential request received', [
             'has_bearer' => ! empty($request->bearerToken()),
             'has_proof' => ! empty($request->input('proof')),
+            'has_proofs' => ! empty($request->input('proofs')),
             'content_type' => $request->header('Content-Type'),
         ]);
 
@@ -63,22 +64,22 @@ class CredentialController extends Controller
 
         $offer = $this->session->findOrFail($tokenData['offer_id']);
 
-        // Validate proof JWT
+        // Extract proof JWT - support both Draft 14 (proofs plural) and Draft 13 (proof singular)
+        $usedDraft14 = false;
+        $proofs = $request->input('proofs');
         $proof = $request->input('proof');
 
-        if (empty($proof) || ($proof['proof_type'] ?? null) !== 'jwt') {
+        if (! empty($proofs) && ! empty($proofs['jwt'][0])) {
+            // Draft 14: "proofs": { "jwt": ["eyJ..."] }
+            $proofJwt = $proofs['jwt'][0];
+            $usedDraft14 = true;
+        } elseif (! empty($proof) && ($proof['proof_type'] ?? null) === 'jwt' && ! empty($proof['jwt'])) {
+            // Draft 13: "proof": { "proof_type": "jwt", "jwt": "eyJ..." }
+            $proofJwt = $proof['jwt'];
+        } else {
             return response()->json([
                 'error' => 'invalid_proof',
                 'error_description' => 'Missing or invalid proof. Expected proof_type=jwt.',
-            ], 400);
-        }
-
-        $proofJwt = $proof['jwt'] ?? null;
-
-        if (empty($proofJwt)) {
-            return response()->json([
-                'error' => 'invalid_proof',
-                'error_description' => 'Missing proof JWT',
             ], 400);
         }
 
@@ -118,14 +119,36 @@ class CredentialController extends Controller
             'credential_type' => config('oid4vci.credential_type', 'AccredifyEmployeePass'),
         ]);
 
+        // Generate a fresh c_nonce for potential follow-up requests
+        $newNonce = bin2hex(random_bytes(16));
+
         Log::info('OID4VCI Credential issued', [
             'holder_did' => $holderDid,
             'has_cnf' => $holderJwk !== null,
+            'draft' => $usedDraft14 ? '14' : '13',
         ]);
 
+        // Return the correct response format based on which proof format was used
+        if ($usedDraft14) {
+            // Draft 14: return "credentials" array
+            return response()->json([
+                'credentials' => [
+                    [
+                        'credential' => $credential,
+                        'format' => 'vc+sd-jwt',
+                    ],
+                ],
+                'c_nonce' => $newNonce,
+                'c_nonce_expires_in' => 300,
+            ]);
+        }
+
+        // Draft 13: return singular "credential"
         return response()->json([
             'format' => 'vc+sd-jwt',
             'credential' => $credential,
+            'c_nonce' => $newNonce,
+            'c_nonce_expires_in' => 300,
         ]);
     }
 
