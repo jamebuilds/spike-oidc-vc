@@ -51,7 +51,7 @@ class PresentationSession
             'input_descriptors' => [[
                 'id' => 'accredify_employee_pass',
                 'format' => [
-                    'vc+sd-jwt' => ['alg' => ['ES256']],
+                    'vc+sd-jwt' => (object) [],
                 ],
                 'constraints' => [
                     'fields' => [
