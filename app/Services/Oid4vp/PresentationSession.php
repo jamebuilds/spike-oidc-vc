@@ -78,14 +78,14 @@ class PresentationSession
     public function buildAuthorizationUri(string $id, string $nonce): string
     {
         $responseUri = url("/oid4vp/{$id}/response");
-        $pdUri = url("/oid4vp/{$id}/pd");
+        $pd = $this->buildPresentationDefinition($id);
 
         return 'openid4vp://authorize?'.http_build_query([
             'response_type' => 'vp_token',
             'client_id' => $responseUri,
             'response_mode' => 'direct_post',
             'state' => $id,
-            'presentation_definition_uri' => $pdUri,
+            'presentation_definition' => json_encode($pd),
             'client_id_scheme' => 'redirect_uri',
             'nonce' => $nonce,
             'response_uri' => $responseUri,
