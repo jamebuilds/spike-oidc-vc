@@ -41,6 +41,15 @@ export default function Welcome() {
                                 Request selective disclosure of claims from a wallet-held SD-JWT credential.
                             </p>
                         </a>
+                        <a
+                            href="/dc-api/create"
+                            className="rounded-lg bg-white p-5 shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] transition-colors hover:bg-[#f5f5f4] dark:bg-[#161615] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] dark:hover:bg-[#1a1a19] sm:col-span-2"
+                        >
+                            <p className="mb-1 text-sm font-medium">Digital Credentials API</p>
+                            <p className="text-xs text-[#706f6c] dark:text-[#A1A09A]">
+                                Request credentials via the browser&apos;s Digital Credentials API (navigator.credentials.get) &mdash; no QR code needed.
+                            </p>
+                        </a>
                     </div>
                 </div>
             </div>
